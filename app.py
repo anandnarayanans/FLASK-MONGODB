@@ -36,7 +36,7 @@ def add_user():
 
 
 
-@app.route('/users')
+@app.route('/users',methods=['GET'])
 def users():
     users=mongo.db.test.find()
     resp=dumps(users)
