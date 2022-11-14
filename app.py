@@ -1,6 +1,6 @@
 from flask import Flask
 
-from flask_pymongo import PyMongo
+from flask_pymongo import pymongo
 
 from bson.json_util import dumps
 from bson.objectid import ObjectId
@@ -12,9 +12,16 @@ from werkzeug.security import generate_password_hash,check_password_hash
 app=Flask(__name__)
 app.secret_key="asd"
 
-app.config['MONGO_URI']="mongodb://localhost:27017/user"
 
-mongo=PyMongo(app)
+con_string = "mongodb+srv://anands2001:QyxZoFp6VLeI1NjA@cluster0.qc5haeq.mongodb.net/test?retryWrites=true&w=majority"
+
+client = pymongo.MongoClient(con_string)
+
+db = client.get_database('user')
+
+user_collection = pymongo.collection.Collection(db, 'demo') #(<database_name>,"<collection_name>")
+print("MongoDB connected Successfully")
+
 
 @app.route('/add',methods=['POST'])
 def add_user():
@@ -25,7 +32,7 @@ def add_user():
     
     if name and email and password and request.method=='POST':
         hashed_password=generate_password_hash(password)
-        _id=mongo.db.test.insert_one({'name':name, 'email':email, 'pwd':hashed_password})
+        _id=user_collection.insert_one({'name':name, 'email':email, 'pwd':hashed_password})
         resp=jsonify("User added SuccessFully")
         resp.status_code=200
         
@@ -36,21 +43,21 @@ def add_user():
 
 
 
-@app.route('/users')
+@app.route('/users',methods=['GET'])
 def users():
-    users=mongo.db.test.find()
+    users=user_collection.find()
     resp=dumps(users)
     return resp
 
 @app.route('/user/<id>')
 def user(id):
-    user=mongo.db.test.find_one({'_id':ObjectId(id)})
+    user=user_collection.find_one({'_id':ObjectId(id)})
     resp=dumps(user)
     return resp
 
 @app.route('/delete/<id>',methods=['DELETE'])
 def delete_user(id):
-    mongo.db.test.delete_one({'_id':ObjectId(id)})
+    user_collection.delete_one({'_id':ObjectId(id)})
     resp=jsonify("USer DEleted Successfully")
     resp.status_code=200
     
@@ -68,7 +75,7 @@ def update_user(id):
     if name and email and password and request.method=='PUT':
         hashed_password=generate_password_hash(password)
         
-        mongo.db.test.update_one({'_id':ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)},{'$set':{'name':name, 'email':email, 'pwd':hashed_password}})
+        user_collection.update_one({'_id':ObjectId(_id['$oid']) if '$oid' in _id else ObjectId(_id)},{'$set':{'name':name, 'email':email, 'pwd':hashed_password}})
         resp=jsonify("Updated Successfuly")
         resp.status_code=200
         return resp
