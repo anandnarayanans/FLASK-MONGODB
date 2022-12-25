@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 
 from flask import jsonify,request
 
-from werkzeug.security import generate_password_hash,check_password_hash
+from werkzeug.security import generate_password_hash
 
 app=Flask(__name__)
 app.secret_key="asd"
