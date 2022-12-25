@@ -37,8 +37,7 @@ def add_user():
         resp.status_code=200
         
         return resp
-    else:
-        return not_found()
+    return not_found()
 
 
 
@@ -79,8 +78,7 @@ def update_user(id):
         resp=jsonify("Updated Successfuly")
         resp.status_code=200
         return resp
-    else:
-        return not_found()
+    return not_found()
     
 
 
